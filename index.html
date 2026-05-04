@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>N4 日本旅遊會話：購物篇</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* Kawaii Background Pattern */
+    body {
+      background-color: #fdf2f8;
+      background-image: radial-gradient(#fbcfe8 3px, transparent 3px);
+      background-size: 40px 40px;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+    }
+
+    /* Custom Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #fef3c7; border-radius: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #fcd34d; border-radius: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #fbbf24; }
+
+    /* Animations */
+    @keyframes bounce-short {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    .animate-bounce-short { animation: bounce-short 0.5s ease-in-out 2; }
+    
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
+    
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-slow { animation: spin-slow 1.5s linear infinite; }
+
+    /* Confetti Canvas */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+  </style>
+</head>
+<!-- 改用 h-[100dvh] 以解決手機瀏覽器工具列遮擋底部的問題 -->
+<body class="h-[100dvh] w-screen flex items-center justify-center p-2 md:p-4 overflow-hidden selection:bg-rose-200">
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- 16:9 Presentation Container - 調整最大高度與邊距，確保絕對不會超出螢幕 -->
+  <div class="w-full max-w-6xl h-full max-h-[90vh] md:max-h-[850px] bg-white rounded-2xl md:rounded-3xl shadow-[0_15px_40px_rgba(225,29,72,0.2)] flex flex-col overflow-hidden relative border-[4px] md:border-[8px] border-white ring-[4px] ring-rose-200">
+    
+    <!-- Header -->
+    <header class="py-3 md:py-0 md:h-[10%] min-h-[60px] md:min-h-[80px] bg-rose-400 text-white flex items-center justify-between px-3 md:px-8 shrink-0 z-10 shadow-md border-b-4 border-rose-500 relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-1/2 bg-white/20"></div>
+      <div class="flex items-center gap-2 md:gap-4 relative z-10">
+        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white flex items-center justify-center font-black text-rose-500 text-lg md:text-xl shadow-[2px_2px_0_#be123c] border-2 border-rose-200 transform -rotate-6 shrink-0">
+          N4
+        </div>
+        <h1 id="page-title" class="text-base md:text-2xl font-black tracking-wider drop-shadow-md flex items-center gap-2">
+          <!-- Title injected by JS -->
+        </h1>
+      </div>
+      <div class="hidden sm:flex text-sm md:text-xl font-black bg-rose-600 px-4 py-1.5 md:px-5 md:py-2 rounded-full shadow-inner border-2 border-rose-700/50 relative z-10 items-center shrink-0 ml-2">
+        PAGE <span id="current-page-num" class="mx-1 md:mx-2">1</span> <span class="text-rose-300 mr-1 md:mr-2">/</span> <span id="total-page-num">20</span>
+      </div>
+    </header>
+
+    <!-- Content Area (Scrollable to prevent cutoff) -->
+    <main id="app-content" class="flex-1 overflow-y-auto custom-scrollbar relative bg-[#fffcf5]">
+      <!-- Content injected by JS -->
+    </main>
+
+    <!-- Footer Navigation - 優化小螢幕佈局，確保按鈕絕對可見 -->
+    <footer class="py-3 md:py-4 bg-white border-t-[4px] border-rose-100 flex items-center justify-between px-2 md:px-10 shrink-0 z-10 relative gap-1 md:gap-4">
+      <button id="btn-prev" class="flex shrink-0 items-center gap-1 md:gap-2 px-3 py-2 md:px-8 md:py-4 rounded-full font-black text-sm md:text-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-rose-50 text-rose-600 border-2 md:border-4 border-rose-200 hover:bg-rose-100 shadow-[2px_2px_0_#fecdd3] md:shadow-[4px_4px_0_#fecdd3] active:scale-95 active:shadow-[1px_1px_0_#fecdd3]">
+        <i class="fa-solid fa-chevron-left"></i> 上一頁
+      </button>
+      
+      <!-- Pagination Dots -->
+      <div id="dots-container" class="flex gap-1 md:gap-1.5 flex-wrap justify-center flex-1 max-w-[50%] md:max-w-full">
+        <!-- Dots injected by JS -->
+      </div>
+
+      <button id="btn-next" class="flex shrink-0 items-center gap-1 md:gap-2 px-3 py-2 md:px-8 md:py-4 rounded-full font-black text-sm md:text-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-rose-400 text-white border-2 md:border-4 border-rose-500 hover:bg-rose-500 shadow-[2px_2px_0_#be123c] md:shadow-[4px_4px_0_#be123c] active:scale-95 active:shadow-[1px_1px_0_#be123c]">
+        下一頁 <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </footer>
+  </div>
+
+<script>
+  // --- Data: 28 Pages Content ---
+  const pagesData = [
+    // --- Block 1 ---
+    {
+      type: 'dialogue', title: 'Unit 1: 尋找咖啡機 (情境對話)',
+      dialogue: [
+        { speaker: '客', text: 'すみません、コーヒーメーカーを[探](さが)しているんですが。', cn: '不好意思，我在找咖啡機。' },
+        { speaker: '店員', text: 'こちらになります。どのような[機能](きのう)をご[希望](きぼう)ですか。', cn: '這邊請。您希望有什麼樣的功能呢？' },
+        { speaker: '客', text: '[毎朝使](まいあさつか)うので、[使](つか)いやすいものがいいです。', cn: '因為每天早上都要用，好用的比較好。' },
+        { speaker: '店員', text: 'それなら、こちらのモデルが[洗](あら)いやすくておすすめです。', cn: '那樣的話，推薦這款容易清洗的機型。' },
+        { speaker: '客', text: 'なるほど。ボタンも[分](わ)かりやすいですね。', cn: '原來如此。按鈕也很容易懂呢。' },
+        { speaker: '店員', text: 'はい、[初心者](しょしんしゃ)の[方](かた)にもご[好評](こうひょう)いただいております。', cn: '是的，也很受初學者的好評。' },
+      ]
+    },
+    {
+      type: 'grammar', title: 'Unit 1: 文法解析 (〜やすい / 〜にくい)',
+      grammar: {
+        point: '〜やすい / 〜にくい', meaning: '容易做... / 很難做... (表示動作的難易度)',
+        rule: '動詞「ます形」去「ます」 ＋ やすい / にくい',
+        examples: [
+          { jp: 'このペンのほうが[書](か)きやすいです。', cn: '這支筆比較好寫。' },
+          { jp: 'この[本](ほん)の[漢字](かんじ)は[読](よ)みにくいです。', cn: '這本書的漢字很難讀。' }
+        ]
+      }
+    },
+    {
+      type: 'grammar_quiz', title: 'Unit 1: 文法練習 (四選一)',
+      questions: [
+        { q: 'この靴はとても（　　）やすいです。', opts: ['歩き', '歩く', '歩いて', '歩いた'], ans: 0, exp: '動詞ます形（歩きます）去掉ます，接やすい。' },
+        { q: 'この肉は硬くて（　　）にくいです。', opts: ['食べる', '食べ', '食べて', '食べた'], ans: 1, exp: '動詞ます形（食べます）去掉ます，接にくい。' },
+        { q: '彼の説明は（　　）やすいですね。', opts: ['わかる', 'わかり', 'わかって', 'わかった'], ans: 1, exp: '動詞ます形（わかります）去掉ます，接やすい。' }
+      ]
+    },
+    {
+      type: 'dialogue', title: 'Unit 2: 比較與決定 (情境對話)',
+      dialogue: [
+        { speaker: '客', text: 'この[二](ふた)つのモデルはどう[違](ちが)いますか。', cn: '這兩款機型有什麼不同？' },
+        { speaker: '店員', text: '[右](みぎ)のほうが高機能ですが、[少](すこ)しサイズが[大](おお)きすぎます。', cn: '右邊的功能比較好，但是尺寸稍微太大了點。' },
+        { speaker: '客', text: '[確](たし)かに、[私](わたし)のキッチンには[大](おお)きすぎるかもしれません。', cn: '確實，對我的廚房來說可能太大了。' },
+        { speaker: '店員', text: '[左](ひだり)のものはコンパクトで、デザインもシンプルですよ。', cn: '左邊的比較小巧，設計也很簡約喔。' },
+        { speaker: '客', text: 'じゃあ、これにします。[高](たか)すぎないし、ちょうどいいです。', cn: '那我就選這個吧。不會太貴，剛剛好。' },
+        { speaker: '店員', text: 'ありがとうございます。[在庫](ざいこ)を[確認](かくにん)いたします。', cn: '謝謝您。我來為您確認一下庫存。' },
+      ]
+    },
+    {
+      type: 'grammar', title: 'Unit 2: 文法解析 (〜すぎる)',
+      grammar: {
+        point: '〜すぎる', meaning: '太過於... (表示程度過度，通常帶有負面語氣)',
+        rule: '動詞ます去ます / い形去い / な形去な ＋ すぎる',
+        examples: [
+          { jp: 'きのうはお[酒](さけ)を[飲](の)みすぎました。', cn: '昨天酒喝太多了。' },
+          { jp: 'このカメラは[高](たか)すぎて、[買](か)えません。', cn: '這台相機太貴了，買不起。' }
+        ]
+      }
+    },
+    {
+      type: 'grammar_quiz', title: 'Unit 2: 文法練習 (四選一)',
+      questions: [
+        { q: 'このカレーは（　　）すぎます。', opts: ['辛い', '辛く', '辛', '辛くて'], ans: 2, exp: 'い形容詞（辛い）去掉い，接すぎる。' },
+        { q: '昨日は少し（　　）すぎました。', opts: ['飲む', '飲み', '飲んで', '飲んだ'], ans: 1, exp: '動詞ます形（飲みます）去掉ます，接すぎる。' },
+        { q: 'この部屋は（　　）すぎて、落ち着かない。', opts: ['静かな', '静かに', '静かだ', '静か'], ans: 3, exp: 'な形容詞（静かだ）去掉だ，接すぎる。' }
+      ]
+    },
+    {
+      type: 'gacha', title: '綜合練習 1 (扭蛋測驗)',
+      question: {
+        text: 'このパソコンは軽くて、持ち運び（　　）。',
+        options: ['1. やすいです', '2. すぎます', '3. やすくます'],
+        correctIndex: 0,
+        explanation: '「容易攜帶」應使用「動詞ます形去ます + やすい」。「持ち運びます」去「ます」接「やすいです」。'
+      }
+    },
+
+    // --- Block 2 ---
+    {
+      type: 'dialogue', title: 'Unit 3: 尋找電子鍋 (情境對話)',
+      dialogue: [
+        { speaker: '客', text: '[炊飯器](すいはんき)が[壊](こわ)れたので、[新](あたら)しいのを[探](さが)しています。', cn: '電子鍋壞了，所以在找新的。' },
+        { speaker: '店員', text: 'ご[家族](かぞく)は[何人](なんにん)ですか。', cn: '您家有幾個人呢？' },
+        { speaker: '客', text: '４[人](にん)です。[朝起](あさお)きたらすぐ[食](た)べられるようにしたいです。', cn: '4個人。希望早上起床就能馬上吃。' },
+        { speaker: '店員', text: 'それでしたら、タイマー[機能](きのう)が[充実](じゅうじつ)したこちらがいかがですか。', cn: '那樣的話，這款定時功能豐富的您覺得如何？' },
+        { speaker: '客', text: '[夜](よる)のうちにお[米](こめ)を[洗](あら)っておきたいので、ぴったりです。', cn: '想在晚上先洗好米放著，所以很適合。' },
+        { speaker: '店員', text: 'はい、[設定](せってい)も[記憶](きおく)しておいてくれますよ。', cn: '是的，設定也會幫您記住喔。' },
+      ]
+    },
+    {
+      type: 'grammar', title: 'Unit 3: 文法解析 (〜ておく)',
+      grammar: {
+        point: '〜ておく', meaning: '事先做好... / 放任...保持原狀 (表示為將來做準備)',
+        rule: '動詞「て形」 ＋ おく',
+        examples: [
+          { jp: '[旅行](りょこう)の[前](まえ)に、ホテルを[予約](よやく)しておきます。', cn: '旅行前，先預訂好飯店。' },
+          { jp: 'そのドアは[開](あ)けておいてください。', cn: '那個門請保持打開的狀態。' }
+        ]
+      }
+    },
+    {
+      type: 'grammar_quiz', title: 'Unit 3: 文法練習 (四選一)',
+      questions: [
+        { q: 'パーティーの前に、部屋を（　　）おきます。', opts: ['掃除する', '掃除し', '掃除して', '掃除した'], ans: 2, exp: '接續在動詞「て形」之後，表示事先準備。' },
+        { q: 'この書類は机の上に（　　）おいてください。', opts: ['置く', '置き', '置いて', '置いた'], ans: 2, exp: '「置く」的て形是「置いて」。' },
+        { q: '明日の会議の資料を（　　）おきましょう。', opts: ['作る', '作って', '作り', '作った'], ans: 1, exp: '「作る」的て形是「作って」。' }
+      ]
+    },
+    {
+      type: 'dialogue', title: 'Unit 4: 確認庫存 (情境對話)',
+      dialogue: [
+        { speaker: '客', text: 'これ、とても[便利](べんり)そうですね。[買](か)います。', cn: '這個看起來很方便呢。我要買。' },
+        { speaker: '店員', text: 'ありがとうございます。ただ、[現在在庫](げんざいざいこ)が[切](き)れているかもしれません。', cn: '謝謝您。不過，現在可能沒庫存了。' },
+        { speaker: '客', text: 'えっ、そうですか。いつ[入荷](にゅうか)しますか。', cn: '咦，這樣啊。什麼時候會進貨呢？' },
+        { speaker: '店員', text: '[少々](しょうしょう)お[待](ま)ちください。…あ、[倉庫](そうこ)に[一](ひと)つだけ[残](のこ)っていました。', cn: '請稍等。…啊，倉庫裡還剩下一個。' },
+        { speaker: '客', text: 'よかったです。[人気商品](にんきしょうひん)なので、すぐ[売](う)り[切](き)れるかもしれないですね。', cn: '太好了。因為是人氣商品，所以可能馬上就賣光了吧。' },
+        { speaker: '店員', text: 'おっしゃる[通](とお)りです。ご[案内](あんない)できてよかったです。', cn: '如您所說。能為您服務真是太好了。' },
+      ]
+    },
+    {
+      type: 'grammar', title: 'Unit 4: 文法解析 (〜かもしれない)',
+      grammar: {
+        point: '〜かもしれない', meaning: '可能... / 也許... (表示說話者的推測，可能性約50%)',
+        rule: '普通形 (名詞/な形容詞不加だ) ＋ かもしれない',
+        examples: [
+          { jp: '[午後](ごご)は[雨](あめ)が[降](ふ)るかもしれません。', cn: '下午可能會下雨。' },
+          { jp: 'このカメラのほうが[安](やす)いかもしれない。', cn: '這台相機也許比較便宜。' }
+        ]
+      }
+    },
+    {
+      type: 'grammar_quiz', title: 'Unit 4: 文法練習 (四選一)',
+      questions: [
+        { q: '明日は雨が（　　）かもしれません。', opts: ['降る', '降り', '降って', '降ろう'], ans: 0, exp: '動詞普通形直接接「かもしれない」。' },
+        { q: '彼はもう（　　）かもしれない。', opts: ['帰るだ', '帰り', '帰って', '帰った'], ans: 3, exp: '動詞過去式普通形（た形）接「かもしれない」。' },
+        { q: 'この店は（　　）かもしれない。', opts: ['有名だ', '有名な', '有名', '有名に'], ans: 2, exp: 'な形容詞語幹直接接「かもしれない」，不加だ/な。' }
+      ]
+    },
+    {
+      type: 'gacha', title: '綜合練習 2 (扭蛋測驗)',
+      question: {
+        text: '友達が来るので、飲み物を（　　）おきます。',
+        options: ['1. 買って', '2. 買う', '3. 買った'],
+        correctIndex: 0,
+        explanation: '「事先做好」的句型是「〜ておく」，前面必須接動詞的て形。「買う」的て形是「買って」。'
+      }
+    },
+
+    // --- Block 3 ---
+    {
+      type: 'dialogue', title: 'Unit 5: 試用3C產品 (情境對話)',
+      dialogue: [
+        { speaker: '客', text: 'このノイズキャンセリングイヤホン、[試聴](しちょう)できますか。', cn: '這款降噪耳機可以試聽嗎？' },
+        { speaker: '店員', text: 'はい、どうぞ。お[持](も)ちのスマートフォンと[接続](せつぞく)しますね。', cn: '好的，請。來和您的智慧型手機連接喔。' },
+        { speaker: '客', text: 'すごい！[使](つか)えば[使](つか)うほど、[音](おと)の[良](よ)さが[分](わ)かります。', cn: '好厲害！越用越能聽出音質有多好。' },
+        { speaker: '店員', text: 'お[客様](きゃくさま)の[耳](みみ)の[形](かたち)に[合](あ)わせて、[音](おと)が[最適化](さいてきか)されるんです。', cn: '聲音會根據客人的耳朵形狀進行最佳化。' },
+        { speaker: '客', text: '[知](し)れば[知](し)るほど、[今](いま)の[技術](ぎじゅつ)はすごいですね。', cn: '越了解越覺得現在的技術真厲害。' },
+        { speaker: '店員', text: 'そうですね。[多](おお)くのお[客様](きゃくさま)に[驚](おどろ)かれます。', cn: '是的。很多客人都會感到驚訝。' },
+      ]
+    },
+    {
+      type: 'grammar', title: 'Unit 5: 文法解析 (〜ば〜ほど)',
+      grammar: {
+        point: '〜ば〜ほど', meaning: '越...越... (表示隨著前項程度增加，後項程度也隨之增加)',
+        rule: '動詞ば形 ＋ 動詞辭書形 ＋ ほど',
+        examples: [
+          { jp: 'パソコンは[操作](そうさ)が[簡単](かんたん)なら[簡単](かんたん)なほどいいです。', cn: '電腦操作越簡單越好。' },
+          { jp: '[日本語](にほんご)は[話](はな)せば[話](はな)すほど[上手](じょうず)になります。', cn: '日文越說會越好。' }
+        ]
+      }
+    },
+    {
+      type: 'grammar_quiz', title: 'Unit 5: 文法練習 (四選一)',
+      questions: [
+        { q: '日本語は（　　）ば話すほど上手になります。', opts: ['話す', '話し', '話せ', '話して'], ans: 2, exp: '第一部分必須使用動詞「ば形」（話せば）。' },
+        { q: 'このカメラは（　　）ば使うほど良さがわかる。', opts: ['使え', '使う', '使い', '使って'], ans: 0, exp: '「使う」的ば形是「使えば」。' },
+        { q: 'スーパーは家から（　　）ければ近いほど便利です。', opts: ['近く', '近い', '近', '近くて'], ans: 2, exp: 'い形容詞去掉「い」加上「ければ」（近ければ）。' }
+      ]
+    },
+    {
+      type: 'dialogue', title: 'Unit 6: 免稅與結帳 (情境對話)',
+      dialogue: [
+        { speaker: '客', text: 'お[会計](かいけい)をお[願](ねが)いします。[免税手続き](めんぜいてつづき)をするために、[何](なに)が[必要](ひつよう)ですか。', cn: '麻煩結帳。為了辦理免稅手續，需要什麼呢？' },
+        { speaker: '店員', text: 'パスポートと、ご[購入](こうにゅう)いただいた[商品](しょうひん)が[必要](ひつよう)です。', cn: '需要護照和您購買的商品。' },
+        { speaker: '客', text: 'はい、パスポートです。お[土産](みやげ)にするために、[綺麗](きれい)にラッピングできますか。', cn: '好的，這是護照。為了當作伴手禮，可以包裝得漂亮一點嗎？' },
+        { speaker: '店員', text: 'もちろんでございます。[無料](むりょう)で承ります。', cn: '當然可以。為您免費包裝。' },
+        { speaker: '客', text: 'ありがとうございます。', cn: '謝謝。' },
+        { speaker: '店員', text: 'それでは、こちらでお[包](つつ)みいたします。', cn: '那麼，就在這邊為您包裝。' },
+      ]
+    },
+    {
+      type: 'grammar', title: 'Unit 6: 文法解析 (〜ために)',
+      grammar: {
+        point: '〜ために', meaning: '為了... (表示目的)',
+        rule: '動詞「辭書形」 ＋ ために / 名詞 ＋ の ＋ ために',
+        examples: [
+          { jp: '[新](あたら)しいパソコンを[買](か)うために、[貯金](ちょきん)しています。', cn: '為了買新電腦，我正在存錢。' },
+          { jp: '[健康](けんこう)のために、[毎日運動](まいにちうんどう)しています。', cn: '為了健康，每天都在運動。' }
+        ]
+      }
+    },
+    {
+      type: 'grammar_quiz', title: 'Unit 6: 文法練習 (四選一)',
+      questions: [
+        { q: '車を（　　）ために、貯金しています。', opts: ['買う', '買い', '買って', '買った'], ans: 0, exp: '動詞辭書形（原形）接「ために」。' },
+        { q: '健康（　　）ために、毎日運動しています。', opts: ['な', 'の', 'だ', 'に'], ans: 1, exp: '名詞接「ために」時，必須加上「の」。' },
+        { q: '家族（　　）ために、一生懸命働きます。', opts: ['が', 'に', 'の', 'を'], ans: 2, exp: '名詞（家族）接「ために」時，必須加上「の」。' }
+      ]
+    },
+    {
+      type: 'gacha', title: '綜合練習 3 (扭蛋測驗)',
+      question: {
+        text: '日本語が上手になる（　　）、毎日練習しています。',
+        options: ['1. ために', '2. ほど', '3. かもしれない'],
+        correctIndex: 0,
+        explanation: '表示「為了（某目的）」使用「ために」。「為了日文變好，每天練習」。'
+      }
+    },
+
+    // --- Block 4 ---
+    {
+      type: 'dialogue', title: 'Unit 7: 配送服務 (情境對話)',
+      dialogue: [
+        { speaker: '客', text: '[荷物](にもつ)が[多](おお)いので、ホテルに[送](おく)ってもらえますか。', cn: '因為行李很多，可以幫我送到飯店嗎？' },
+        { speaker: '店員', text: 'はい、[可能](かのう)です。[商品](しょうひん)は段ボールに[入](い)れてあります。', cn: '好的，沒問題。商品已經裝在紙箱裡了。' },
+        { speaker: '客', text: '[割](わ)れ[物](もの)は[入](はい)っていませんか。', cn: '裡面有易碎物品嗎？' },
+        { speaker: '店員', text: 'ご[安心](あんしん)ください。クッション[材](ざい)でしっかり[包](つつ)んであります。', cn: '請放心。已經用緩衝材料好好包裝了。' },
+        { speaker: '客', text: 'それは助かります。[明日](あした)の[午前中](ごぜんちゅう)に着きますか。', cn: '那就幫大忙了。明天上午會到嗎？' },
+        { speaker: '店員', text: 'はい、[指定](してい)しておきます。ありがとうございました。', cn: '好的，我會為您指定。謝謝您。' },
+      ]
+    },
+    {
+      type: 'grammar', title: 'Unit 7: 文法解析 (〜てある)',
+      grammar: {
+        point: '〜てある', meaning: '已經...了 / 處於...狀態 (表示某人有目的地做了某事，結果保留至今)',
+        rule: '他動詞「て形」 ＋ ある',
+        examples: [
+          { jp: 'カレンダーに[予定](よてい)が[書](か)いてあります。', cn: '日曆上寫著預定行程。' },
+          { jp: 'ジュースは[冷蔵庫](れいぞうこ)に[入](い)れてあります。', cn: '果汁已經放進冰箱裡了。' }
+        ]
+      }
+    },
+    {
+      type: 'grammar_quiz', title: 'Unit 7: 文法練習 (四選一)',
+      questions: [
+        { q: '机の上に本が（　　）あります。', opts: ['置く', '置き', '置いて', '置いた'], ans: 2, exp: '接在動詞「て形」之後，表示動作的結果存留狀態。' },
+        { q: '壁にポスターが（　　）あります。', opts: ['貼る', '貼り', '貼って', '貼った'], ans: 2, exp: '「貼る」的て形是「貼って」。' },
+        { q: '窓が（　　）あります。', opts: ['開ける', '開け', '開けた', '開けて'], ans: 3, exp: '「開ける」的て形是「開けて」。' }
+      ]
+    },
+    {
+      type: 'dialogue', title: 'Unit 8: 徵詢建議 (情境對話)',
+      dialogue: [
+        { speaker: '客', text: '[来月](らいげつ)、[旅行](りょこう)に[行](い)くんですが、どのカメラがいいですか。', cn: '下個月要去旅行，哪台相機比較好呢？' },
+        { speaker: '店員', text: '[風景](ふうけい)を撮るなら、こちらのミラーレスを[買](か)ったほうがいいですよ。', cn: '如果要拍風景的話，買這台微單眼相機比較好喔。' },
+        { speaker: '客', text: '[重](おも)くないですか。', cn: '不會很重嗎？' },
+        { speaker: '店員', text: 'はい、とても[軽](かる)いです。[旅行](りょこう)なら、[重](おも)いレンズは[持](も)っていかないほうがいいです。', cn: '是的，非常輕。如果是旅行的話，最好不要帶很重的鏡頭。' },
+        { speaker: '客', text: 'なるほど。じゃあ、これを[買](か)います。', cn: '原來如此。那我就買這台。' },
+        { speaker: '店員', text: 'かしこまりました。ありがとうございます。', cn: '好的。謝謝您。' },
+      ]
+    },
+    {
+      type: 'grammar', title: 'Unit 8: 文法解析 (〜たほうがいい)',
+      grammar: {
+        point: '〜たほうがいい', meaning: '最好... / 最好不要... (給予建議或忠告)',
+        rule: '動詞「た形」 / 動詞「ない形」 ＋ ほうがいいです',
+        examples: [
+          { jp: '[熱](ねつ)があるから、[早](はや)く[寝](ね)たほうがいいですよ。', cn: '因為發燒了，最好早點睡喔。' },
+          { jp: '[夜遅](よるおそ)くにコーヒーを[飲](の)まないほうがいいです。', cn: '深夜最好不要喝咖啡。' }
+        ]
+      }
+    },
+    {
+      type: 'grammar_quiz', title: 'Unit 8: 文法練習 (四選一)',
+      questions: [
+        { q: '熱があるなら、早く（　　）ほうがいいですよ。', opts: ['寝る', '寝て', '寝た', '寝ない'], ans: 2, exp: '建議「最好做...」使用動詞「た形」。' },
+        { q: 'その話は彼に（　　）ほうがいい。', opts: ['言わなく', '言わない', '言わなくて', '言わなかった'], ans: 1, exp: '建議「最好不要做...」使用動詞「ない形」。' },
+        { q: '病院へ（　　）ほうがいいですよ。', opts: ['行く', '行って', '行った', '行かない'], ans: 2, exp: '「行く」的た形是「行った」。' }
+      ]
+    },
+    {
+      type: 'gacha', title: '綜合練習 4 (扭蛋測驗)',
+      question: {
+        text: '疲れているなら、今日は無理を（　　）ほうがいいですよ。',
+        options: ['1. しない', '2. した', '3. します'],
+        correctIndex: 0,
+        explanation: '建議「最好不要...」使用「動詞ない形 + ほうがいいです」。「無理をする」的ない形是「無理をしない」。'
+      }
+    }
+  ];
+
+  // --- Logic & State ---
+  let currentPage = 0;
+  let totalPages = pagesData.length;
+  let gachaStates = Array(totalPages).fill(null).map(() => ({ stage: 'idle', selected: null }));
+  let grammarQuizStates = Array(totalPages).fill(null).map(() => ({ answers: [null, null, null] }));
+
+  // DOM Elements
+  const appContent = document.getElementById('app-content');
+  const pageTitle = document.getElementById('page-title');
+  const currentPageNum = document.getElementById('current-page-num');
+  const totalPageNum = document.getElementById('total-page-num');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  const dotsContainer = document.getElementById('dots-container');
+
+  totalPageNum.textContent = totalPages;
+
+  // Helper: Parse Ruby
+  function parseText(text) {
+    if (!text) return '';
+    return text.replace(/\[(.*?)\]\((.*?)\)/g, '<ruby class="px-[2px] font-bold text-gray-800">$1<rt class="text-[0.65em] text-rose-500 font-medium tracking-tighter">$2</rt></ruby>');
+  }
+
+  // Render Functions
+  function renderDialogue(data) {
+    let html = `
+      <div class="p-6 md:p-8 flex flex-col items-center justify-center min-h-full w-full bg-gradient-to-br from-[#fff5f7] to-[#e0f2fe] relative">
+        <div class="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
+          <i class="fa-regular fa-comments absolute top-10 left-10 text-cyan-500 text-6xl transform -rotate-12"></i>
+          <i class="fa-solid fa-mug-hot absolute bottom-20 right-10 text-rose-500 text-6xl transform rotate-12"></i>
+        </div>
+        <div class="w-full max-w-4xl flex flex-col gap-4 z-10">
+    `;
+
+    data.dialogue.forEach(line => {
+      const isCustomer = line.speaker === '客';
+      if (isCustomer) {
+        html += `
+          <div class="flex items-end gap-3 justify-start animate-fade-in">
+            <div class="w-10 h-10 md:w-14 md:h-14 rounded-full bg-cyan-200 border-2 border-cyan-400 flex items-center justify-center text-cyan-700 shadow-sm shrink-0">
+              <i class="fa-solid fa-user text-lg md:text-xl"></i>
+            </div>
+            <div class="max-w-[80%] md:max-w-[75%] rounded-2xl md:rounded-[2rem] px-5 py-3 md:px-6 md:py-4 bg-cyan-50 border-2 border-cyan-300 rounded-bl-none shadow-sm relative group">
+              <div class="text-sm font-bold mb-1 text-cyan-700">お客様 👨</div>
+              <div class="text-lg md:text-xl text-gray-800 leading-relaxed font-bold">${parseText(line.text)}</div>
+              
+              <!-- 隱藏的中文翻譯區域 -->
+              <div class="hidden cn-text mt-3 pt-3 border-t-2 border-cyan-200/50 text-cyan-800 text-base md:text-lg font-bold animate-fade-in">${line.cn}</div>
+              <!-- 點擊展開按鈕 -->
+              <button onclick="toggleDialogueTranslation(this)" class="mt-2 text-xs md:text-sm bg-cyan-200/60 hover:bg-cyan-300 text-cyan-800 px-3 py-1.5 rounded-full font-bold transition-all active:scale-95 inline-flex items-center gap-1 shadow-sm">
+                <i class="fa-solid fa-language"></i> 中文翻譯
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="flex items-end gap-3 justify-end animate-fade-in">
+            <div class="max-w-[80%] md:max-w-[75%] rounded-2xl md:rounded-[2rem] px-5 py-3 md:px-6 md:py-4 bg-lime-50 border-2 border-lime-300 rounded-br-none shadow-sm relative group text-right">
+              <div class="text-sm font-bold mb-1 text-lime-700">店員さん 🏪</div>
+              <div class="text-lg md:text-xl text-gray-800 leading-relaxed font-bold">${parseText(line.text)}</div>
+              
+              <!-- 隱藏的中文翻譯區域 -->
+              <div class="hidden cn-text mt-3 pt-3 border-t-2 border-lime-200/50 text-lime-800 text-base md:text-lg font-bold animate-fade-in text-left">${line.cn}</div>
+              <!-- 點擊展開按鈕 -->
+              <button onclick="toggleDialogueTranslation(this)" class="mt-2 text-xs md:text-sm bg-lime-200/60 hover:bg-lime-300 text-lime-800 px-3 py-1.5 rounded-full font-bold transition-all active:scale-95 inline-flex items-center gap-1 shadow-sm">
+                <i class="fa-solid fa-language"></i> 中文翻譯
+              </button>
+            </div>
+            <div class="w-10 h-10 md:w-14 md:h-14 rounded-full bg-lime-200 border-2 border-lime-400 flex items-center justify-center text-lime-700 shadow-sm shrink-0">
+              <i class="fa-solid fa-store text-lg md:text-xl"></i>
+            </div>
+          </div>
+        `;
+      }
+    });
+
+    html += `</div></div>`;
+    return html;
+  }
+
+  function renderGrammar(data) {
+    let examplesHtml = data.grammar.examples.map((ex, idx) => `
+      <div class="bg-white p-4 md:p-5 rounded-2xl border-2 border-rose-100 shadow-[4px_4px_0px_#fecdd3] relative overflow-hidden mb-4">
+        <div class="absolute top-0 left-0 w-2 h-full bg-rose-400"></div>
+        <div class="text-xl md:text-2xl font-bold text-gray-800 leading-relaxed ml-3">${parseText(ex.jp)}</div>
+        <div class="mt-3 flex items-center gap-3 ml-3">
+          <button onclick="toggleTranslation(this)" class="text-sm md:text-base bg-rose-400 hover:bg-rose-500 text-white px-4 py-2 rounded-full font-bold shadow-sm active:scale-95 transition-transform">
+            <i class="fa-solid fa-eye mr-1"></i> 顯示中文
+          </button>
+          <div class="translation hidden text-rose-700 text-lg font-bold bg-rose-50 px-3 py-1 rounded-lg animate-fade-in">${ex.cn}</div>
+        </div>
+      </div>
+    `).join('');
+
+    return `
+      <div class="min-h-full w-full bg-yellow-50 flex flex-col md:flex-row items-center p-6 md:p-8 relative shadow-inner">
+        <i class="fa-solid fa-star absolute top-6 right-8 text-yellow-300 text-5xl opacity-50 animate-pulse"></i>
+        
+        <!-- Left: Grammar Info -->
+        <div class="w-full md:w-1/2 flex flex-col justify-center md:pr-8 md:border-r-2 border-dashed border-yellow-300 mb-6 md:mb-0">
+          <div class="inline-flex items-center gap-2 bg-amber-400 text-white text-sm md:text-base px-4 py-1.5 rounded-full mb-4 w-max font-black shadow-sm transform -rotate-2">
+            <i class="fa-solid fa-book-open"></i> 重點文法
+          </div>
+          <h3 class="text-3xl md:text-4xl font-black text-amber-900 mb-4 drop-shadow-sm leading-tight">${data.grammar.point}</h3>
+          <p class="text-lg md:text-xl text-amber-800 font-bold mb-5 bg-white/70 p-3 rounded-xl border border-amber-100">${data.grammar.meaning}</p>
+          
+          <div class="bg-orange-100 text-orange-900 border-2 border-orange-200 p-4 rounded-2xl font-bold">
+            <span class="bg-orange-200 text-orange-800 px-2 py-1 rounded text-sm md:text-base block w-max mb-2">接續形態</span>
+            <div class="text-lg md:text-xl leading-relaxed">${data.grammar.rule}</div>
+          </div>
+        </div>
+
+        <!-- Right: Examples -->
+        <div class="w-full md:w-1/2 flex flex-col justify-center md:pl-6">
+          <div class="text-xl font-black text-amber-700 mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-play text-amber-500"></i> 例句練習
+          </div>
+          ${examplesHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderGrammarQuiz(data, pageIndex) {
+    const state = grammarQuizStates[pageIndex];
+    let questionsHtml = data.questions.map((q, qIdx) => {
+      let optsHtml = q.opts.map((opt, oIdx) => {
+        let btnClass = "w-full md:flex-1 text-center py-2.5 px-3 rounded-xl border-2 font-bold transition-all ";
+        let iconHtml = '';
+        const isSelected = state.answers[qIdx] === oIdx;
+        const isCorrect = q.ans === oIdx;
+        const hasAnswered = state.answers[qIdx] !== null;
+
+        if (hasAnswered) {
+          if (isCorrect) {
+            btnClass += "bg-lime-100 border-lime-500 text-lime-800 shadow-sm ";
+            iconHtml = '<i class="fa-solid fa-check ml-1 text-lime-500"></i>';
+          } else if (isSelected) {
+            btnClass += "bg-rose-100 border-rose-500 text-rose-800 ";
+            iconHtml = '<i class="fa-solid fa-xmark ml-1 text-rose-500"></i>';
+          } else {
+            btnClass += "bg-gray-50 border-gray-200 text-gray-400 opacity-50 ";
+          }
+        } else {
+          btnClass += "bg-white border-blue-200 hover:bg-blue-50 text-blue-800 cursor-pointer hover:border-blue-400 active:scale-95 ";
+        }
+
+        return `<button onclick="handleGrammarQuizSelect(${pageIndex}, ${qIdx}, ${oIdx})" ${hasAnswered ? 'disabled' : ''} class="${btnClass}">
+                  ${parseText(opt)}${iconHtml}
+                </button>`;
+      }).join('');
+
+      let expHtml = '';
+      if (state.answers[qIdx] !== null) {
+          const correct = state.answers[qIdx] === q.ans;
+          expHtml = `
+            <div class="mt-3 text-sm md:text-base p-3 rounded-xl font-bold border-2 ${correct ? 'bg-lime-50 border-lime-200 text-lime-800' : 'bg-rose-50 border-rose-200 text-rose-800'} animate-fade-in">
+              ${correct ? '⭕ 正解！' : '❌ ざんねん！'} ${q.exp}
+            </div>
+          `;
+      }
+
+      return `
+        <div class="bg-white p-4 md:p-6 rounded-[2rem] border-4 border-blue-100 shadow-[4px_4px_0_#bfdbfe] relative mb-5 md:mb-6">
+          <div class="absolute -top-4 -left-2 bg-blue-500 text-white px-4 py-1 rounded-full font-black text-sm md:text-base shadow-sm transform -rotate-3 border-2 border-white">
+            Q${qIdx + 1}
+          </div>
+          <div class="text-lg md:text-xl font-black text-gray-800 mb-4 ml-2 mt-2 border-b-2 border-dashed border-blue-100 pb-2">
+            ${parseText(q.q)}
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+            ${optsHtml}
+          </div>
+          ${expHtml}
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="min-h-full w-full bg-blue-50 p-6 md:p-8 relative overflow-x-hidden">
+        <i class="fa-solid fa-pen-to-square absolute top-6 right-8 text-blue-200 text-6xl transform rotate-12 opacity-50"></i>
+        <div class="max-w-4xl mx-auto z-10 relative">
+          <div class="inline-flex items-center gap-2 bg-blue-500 text-white text-base md:text-lg px-6 py-2 rounded-full mb-6 font-black shadow-[4px_4px_0_#1e3a8a] transform -rotate-1">
+            <i class="fa-solid fa-list-check"></i> 選擇題練習 (四選一)
+          </div>
+          ${questionsHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderGacha(data, pageIndex) {
+    const state = gachaStates[pageIndex];
+    let rightPanelHtml = '';
+
+    if (state.stage === 'idle' || state.stage === 'spinning') {
+      rightPanelHtml = `
+        <div class="h-64 md:h-[24rem] flex flex-col items-center justify-center border-[6px] border-dashed border-orange-300 rounded-[2rem] bg-white/70 shadow-sm w-full">
+          <i class="fa-solid fa-gift text-orange-300 text-6xl md:text-8xl mb-4 ${state.stage === 'spinning' ? 'animate-bounce' : 'animate-pulse'}"></i>
+          <p class="text-2xl md:text-3xl font-black text-orange-400 tracking-widest">コインを入れてね！</p>
+        </div>
+      `;
+    } else {
+      let optionsHtml = data.question.options.map((opt, idx) => {
+        let btnClass = "w-full text-left px-5 py-4 md:px-6 md:py-5 rounded-2xl border-4 transition-all text-lg md:text-xl font-bold flex items-center justify-between ";
+        let iconHtml = '';
+        
+        if (state.stage === 'result') {
+          if (idx === data.question.correctIndex) {
+            btnClass += "bg-lime-100 border-lime-500 text-lime-800 shadow-sm scale-[1.02] z-10";
+            iconHtml = '<i class="fa-solid fa-circle-check text-2xl md:text-3xl text-lime-500"></i>';
+          } else if (idx === state.selected) {
+            btnClass += "bg-rose-100 border-rose-500 text-rose-800 opacity-90";
+            iconHtml = '<i class="fa-solid fa-circle-xmark text-2xl md:text-3xl text-rose-500"></i>';
+          } else {
+            btnClass += "bg-gray-50 border-gray-200 text-gray-400 opacity-50";
+          }
+        } else {
+          btnClass += "bg-orange-50 border-orange-200 hover:border-orange-400 hover:bg-orange-100 text-orange-900 cursor-pointer";
+        }
+
+        return `<button onclick="handleGachaSelect(${pageIndex}, ${idx})" ${state.stage === 'result' ? 'disabled' : ''} class="${btnClass}">
+                  <span>${parseText(opt)}</span>
+                  ${iconHtml}
+                </button>`;
+      }).join('');
+
+      let resultBox = '';
+      if (state.stage === 'result') {
+        const isCorrect = state.selected === data.question.correctIndex;
+        resultBox = `
+          <div class="mt-6 p-4 md:p-5 rounded-2xl text-lg md:text-xl font-bold border-4 animate-bounce-short ${isCorrect ? 'bg-lime-50 border-lime-300 text-lime-800' : 'bg-rose-50 border-rose-300 text-rose-800'}">
+            <div class="flex items-center gap-2 mb-2 text-xl md:text-2xl">
+              ${isCorrect ? '🎉 大正解！' : '💦 ざんねん！'}
+            </div>
+            <p class="font-medium text-base md:text-lg">${data.question.explanation}</p>
+          </div>
+        `;
+      }
+
+      rightPanelHtml = `
+        <div class="bg-white p-6 md:p-8 rounded-[2rem] border-[6px] border-orange-300 shadow-[6px_6px_0_#fdba74] animate-fade-in relative w-full flex flex-col">
+          <div class="absolute -top-5 left-6 bg-rose-500 text-white px-4 py-1.5 rounded-full font-black text-lg border-2 border-white transform -rotate-3">
+            📝 問題
+          </div>
+          <div class="text-xl md:text-2xl font-black text-gray-800 mb-6 mt-4 leading-loose border-b-2 border-dashed border-orange-200 pb-4 text-center">
+            ${parseText(data.question.text)}
+          </div>
+          <div class="space-y-3 flex-1">
+            ${optionsHtml}
+          </div>
+          ${resultBox}
+        </div>
+      `;
+    }
+
+    return `
+      <div class="min-h-full w-full flex flex-col md:flex-row items-center justify-center bg-[#fff8e7] p-6 md:p-8 gap-8 md:gap-12 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#f59e0b 2px, transparent 2px); background-size: 30px 30px;"></div>
+        
+        <!-- Left: Gacha Machine -->
+        <div class="flex-shrink-0 flex flex-col items-center z-10 w-full md:w-auto mt-4 md:mt-0">
+          <div class="w-48 h-48 md:w-56 md:h-56 rounded-t-full border-[8px] md:border-[10px] border-orange-400 bg-sky-100 relative overflow-hidden flex flex-wrap justify-center content-end pb-3 gap-1 shadow-inner">
+             ${[...Array(8)].map((_, i) => `<div class="w-10 h-10 md:w-12 md:h-12 rounded-full shadow-md border-[3px] border-white/60 ${['bg-rose-400', 'bg-sky-400', 'bg-amber-400', 'bg-lime-400', 'bg-fuchsia-400'][i%5]} ${state.stage === 'spinning' ? 'animate-bounce' : ''}" style="animation-delay: ${i*0.1}s"></div>`).join('')}
+          </div>
+          <div class="w-56 h-48 md:w-64 md:h-56 bg-orange-500 rounded-b-[2rem] border-[8px] md:border-[10px] border-t-0 border-orange-400 relative shadow-[0_8px_0_#c2410c] flex flex-col items-center pt-6 space-y-4 md:space-y-6 ${state.stage === 'spinning' ? 'animate-pulse' : ''}">
+             <button onclick="handleGachaPush(${pageIndex})" ${state.stage !== 'idle' ? 'disabled' : ''} class="group flex flex-col items-center transition-transform active:scale-90 disabled:opacity-50 z-20">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-yellow-300 rounded-full border-[6px] border-yellow-500 shadow-[0_6px_0_#b45309] flex items-center justify-center ${state.stage === 'spinning' ? 'animate-spin-slow' : ''}">
+                   <i class="fa-solid fa-coins text-3xl md:text-4xl text-orange-700"></i>
+                </div>
+                ${state.stage === 'idle' ? `<span class="mt-3 md:mt-4 font-black text-white bg-red-500 px-4 py-1.5 rounded-full shadow-sm text-sm md:text-base border-2 border-white animate-bounce">PUSH!</span>` : ''}
+             </button>
+             <div class="w-20 h-16 md:w-24 md:h-16 bg-gray-800 rounded-t-2xl absolute bottom-0 shadow-inner flex justify-center items-end pb-2 border-[4px] border-b-0 border-gray-600">
+                ${(state.stage === 'question' || state.stage === 'result') ? `<div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-rose-400 border-[3px] border-white shadow-sm animate-bounce absolute -bottom-3"></div>` : ''}
+             </div>
+          </div>
+        </div>
+
+        <!-- Right: Question Area -->
+        <div class="w-full max-w-lg z-10">
+          ${rightPanelHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  // --- UI Update ---
+  function updateUI() {
+    const data = pagesData[currentPage];
+    
+    let iconClass = 'fa-book';
+    if (data.type === 'dialogue') iconClass = 'fa-comments';
+    if (data.type === 'gacha') iconClass = 'fa-gamepad';
+    if (data.type === 'grammar_quiz') iconClass = 'fa-list-check';
+    
+    pageTitle.innerHTML = `<i class="fa-solid ${iconClass}"></i> ${data.title}`;
+    currentPageNum.textContent = currentPage + 1;
+    totalPageNum.textContent = totalPages;
+
+    btnPrev.disabled = currentPage === 0;
+    btnNext.disabled = currentPage === totalPages - 1;
+
+    // Build Dots (縮小尺寸以容納 28 頁)
+    dotsContainer.innerHTML = pagesData.map((_, idx) => `
+      <button onclick="goToPage(${idx})" class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full transition-all border-2 ${currentPage === idx ? 'bg-rose-400 border-rose-500 scale-125' : 'bg-rose-100 border-rose-200 hover:bg-rose-300'}"></button>
+    `).join('');
+
+    // Render Content
+    if (data.type === 'dialogue') {
+      appContent.innerHTML = renderDialogue(data);
+    } else if (data.type === 'grammar') {
+      appContent.innerHTML = renderGrammar(data);
+    } else if (data.type === 'grammar_quiz') {
+      appContent.innerHTML = renderGrammarQuiz(data, currentPage);
+    } else if (data.type === 'gacha') {
+      appContent.innerHTML = renderGacha(data, currentPage);
+    }
+
+    // Scroll top
+    appContent.scrollTop = 0;
+  }
+
+  // --- Actions ---
+  window.goToPage = function(idx) {
+    currentPage = idx;
+    stopConfetti();
+    updateUI();
+  }
+
+  window.toggleTranslation = function(btn) {
+    const div = btn.nextElementSibling;
+    div.classList.toggle('hidden');
+    if(div.classList.contains('hidden')){
+      btn.innerHTML = '<i class="fa-solid fa-eye mr-1"></i> 顯示中文';
+    } else {
+      btn.innerHTML = '<i class="fa-solid fa-eye-slash mr-1"></i> 隱藏中文';
+    }
+  }
+
+  // 新增：對話框翻譯開關邏輯
+  window.toggleDialogueTranslation = function(btn) {
+    const div = btn.previousElementSibling; 
+    div.classList.toggle('hidden');
+    if(div.classList.contains('hidden')){
+      btn.innerHTML = '<i class="fa-solid fa-language"></i> 中文翻譯';
+    } else {
+      btn.innerHTML = '<i class="fa-solid fa-eye-slash"></i> 隱藏翻譯';
+    }
+  }
+
+  // 新增：選擇題點擊邏輯
+  window.handleGrammarQuizSelect = function(pageIndex, qIdx, optIdx) {
+    const state = grammarQuizStates[pageIndex];
+    if (state.answers[qIdx] !== null) return; // already answered
+    state.answers[qIdx] = optIdx;
+    
+    // Check if all answered correctly to maybe trigger confetti
+    const quizData = pagesData[pageIndex];
+    const allCorrect = quizData.questions.every((q, idx) => state.answers[idx] === q.ans);
+    const allAnswered = state.answers.every(a => a !== null);
+    
+    if (allAnswered && allCorrect) {
+        startConfetti();
+    }
+    
+    updateUI();
+  }
+
+  window.handleGachaPush = function(pageIndex) {
+    if(gachaStates[pageIndex].stage !== 'idle') return;
+    gachaStates[pageIndex].stage = 'spinning';
+    updateUI();
+    
+    setTimeout(() => {
+      gachaStates[pageIndex].stage = 'question';
+      updateUI();
+    }, 1500);
+  }
+
+  window.handleGachaSelect = function(pageIndex, optIdx) {
+    const state = gachaStates[pageIndex];
+    if (state.stage === 'result') return;
+    
+    state.selected = optIdx;
+    state.stage = 'result';
+    
+    if (optIdx === pagesData[pageIndex].question.correctIndex) {
+      startConfetti();
+    }
+    updateUI();
+  }
+
+  btnPrev.addEventListener('click', () => {
+    if (currentPage > 0) goToPage(currentPage - 1);
+  });
+
+  btnNext.addEventListener('click', () => {
+    if (currentPage < totalPages - 1) goToPage(currentPage + 1);
+  });
+
+
+  // --- Confetti Logic ---
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  let confettiParticles = [];
+  let animationId = null;
+  let isConfettiActive = false;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  function startConfetti() {
+    isConfettiActive = true;
+    confettiParticles = Array.from({ length: 150 }).map(() => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      vx: (Math.random() - 0.5) * 8,
+      vy: Math.random() * 4 + 3,
+      color: `hsl(${Math.random() * 360}, 100%, 65%)`,
+      size: Math.random() * 12 + 6,
+      rot: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 15,
+      type: Math.random() > 0.5 ? 'rect' : 'circle'
+    }));
+
+    if (!animationId) renderConfetti();
+  }
+
+  function stopConfetti() {
+    isConfettiActive = false;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+  }
+
+  function renderConfetti() {
+    if (!isConfettiActive) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    confettiParticles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.rotSpeed;
+      if (p.y > canvas.height) {
+        p.y = -20;
+        p.x = Math.random() * canvas.width;
+      }
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate((p.rot * Math.PI) / 180);
+      ctx.fillStyle = p.color;
+      if (p.type === 'rect') {
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+      } else {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.size/2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+    animationId = requestAnimationFrame(renderConfetti);
+  }
+
+  // Initialize
+  updateUI();
+</script>
+</body>
+</html>
